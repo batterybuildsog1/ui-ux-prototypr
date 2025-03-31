@@ -454,37 +454,26 @@ class MortgageDataCollection {
   nextPage() {
     if (this.currentPage < this.totalPages) {
       // Apply transition animation
+      // Apply fade-out transition (optional, can be handled by CSS if preferred)
       const content = this.sheetController.getContentElement();
-      
-      // Apply more sophisticated transition
-      content.style.transition = 'transform 0.35s cubic-bezier(0.4, 0.0, 0.2, 1), opacity 0.35s cubic-bezier(0.4, 0.0, 0.2, 1)';
-      content.style.transform = 'translateX(-10%)';
+      content.style.transition = 'opacity 0.15s ease-out';
       content.style.opacity = '0';
-      
-      // Change page after animation
+
+      // Change page after fade-out
       setTimeout(() => {
         this.currentPage++;
-        
-        // Render new content
-        this.renderCurrentSection();
-        
-        // Reset transform immediately (no animation)
-        content.style.transition = 'none';
-        content.style.transform = 'translateX(10%)';
-        
-        // Force reflow to ensure the transform takes effect before next animation
-        void content.offsetWidth;
-        
-        // Animate new content in
-        content.style.transition = 'transform 0.35s cubic-bezier(0.4, 0.0, 0.2, 1), opacity 0.35s cubic-bezier(0.4, 0.0, 0.2, 1)';
-        content.style.transform = 'translateX(0)';
+        this.renderCurrentSection(); // Renders new content
+
+        // Fade in new content (handled by setContent or CSS)
+        // No need for transform manipulation here
+        content.style.transition = 'opacity 0.15s ease-in';
         content.style.opacity = '1';
-        
+
         // Reset transition after animation completes
         setTimeout(() => {
           content.style.transition = '';
-        }, 350);
-      }, 350);
+        }, 150);
+      }, 150);
     }
   }
   
@@ -494,37 +483,26 @@ class MortgageDataCollection {
   previousPage() {
     if (this.currentPage > 1) {
       // Apply transition animation
+      // Apply fade-out transition (optional, can be handled by CSS if preferred)
       const content = this.sheetController.getContentElement();
-      
-      // Apply more sophisticated transition
-      content.style.transition = 'transform 0.35s cubic-bezier(0.4, 0.0, 0.2, 1), opacity 0.35s cubic-bezier(0.4, 0.0, 0.2, 1)';
-      content.style.transform = 'translateX(10%)';
+      content.style.transition = 'opacity 0.15s ease-out';
       content.style.opacity = '0';
-      
-      // Change page after animation
+
+      // Change page after fade-out
       setTimeout(() => {
         this.currentPage--;
-        
-        // Render new content
-        this.renderCurrentSection();
-        
-        // Reset transform immediately (no animation)
-        content.style.transition = 'none';
-        content.style.transform = 'translateX(-10%)';
-        
-        // Force reflow to ensure the transform takes effect before next animation
-        void content.offsetWidth;
-        
-        // Animate new content in
-        content.style.transition = 'transform 0.35s cubic-bezier(0.4, 0.0, 0.2, 1), opacity 0.35s cubic-bezier(0.4, 0.0, 0.2, 1)';
-        content.style.transform = 'translateX(0)';
+        this.renderCurrentSection(); // Renders new content
+
+        // Fade in new content (handled by setContent or CSS)
+        // No need for transform manipulation here
+        content.style.transition = 'opacity 0.15s ease-in';
         content.style.opacity = '1';
-        
+
         // Reset transition after animation completes
         setTimeout(() => {
           content.style.transition = '';
-        }, 350);
-      }, 350);
+        }, 150);
+      }, 150);
     }
   }
   
@@ -544,50 +522,27 @@ class MortgageDataCollection {
     const isForward = newIndex > currentIndex;
     
     // Apply transition animation
+    // Apply fade-out transition (optional, can be handled by CSS if preferred)
     const content = this.sheetController.getContentElement();
-    
-    // Apply transition with direction
-    content.style.transition = 'transform 0.4s cubic-bezier(0.4, 0.0, 0.2, 1), opacity 0.4s cubic-bezier(0.4, 0.0, 0.2, 1)';
-    
-    if (isForward) {
-      // Moving to next section
-      content.style.transform = 'translateX(-20%) scale(0.95)';
-    } else {
-      // Moving to previous section
-      content.style.transform = 'translateX(20%) scale(0.95)';
-    }
-    
+    content.style.transition = 'opacity 0.2s ease-out';
     content.style.opacity = '0';
-    
-    // Change section after animation
+
+    // Change section after fade-out
     setTimeout(() => {
       this.currentSection = section;
       this.currentPage = 1;
-      
-      // Render new content
-      this.renderCurrentSection();
-      
-      // Reset transform immediately (no animation)
-      content.style.transition = 'none';
-      if (isForward) {
-        content.style.transform = 'translateX(20%) scale(0.95)';
-      } else {
-        content.style.transform = 'translateX(-20%) scale(0.95)';
-      }
-      
-      // Force reflow to ensure the transform takes effect before next animation
-      void content.offsetWidth;
-      
-      // Animate new content in
-      content.style.transition = 'transform 0.4s cubic-bezier(0.4, 0.0, 0.2, 1), opacity 0.4s cubic-bezier(0.4, 0.0, 0.2, 1)';
-      content.style.transform = 'translateX(0) scale(1)';
+      this.renderCurrentSection(); // Renders new content
+
+      // Fade in new content (handled by setContent or CSS)
+      // No need for transform manipulation here
+      content.style.transition = 'opacity 0.2s ease-in';
       content.style.opacity = '1';
-      
+
       // Reset transition after animation completes
       setTimeout(() => {
         content.style.transition = '';
-      }, 400);
-    }, 400);
+      }, 200);
+    }, 200);
   }
   
   /**

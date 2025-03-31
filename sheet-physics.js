@@ -11,10 +11,11 @@ class SheetPhysics {
   constructor(options = {}) {
     // Spring physics constants - calibrated for native-like feel
     this.mass = options.mass || 1;
-    this.stiffness = options.stiffness || 350;  // Higher = snappier
-    this.damping = options.damping || 35;       // Higher = less bouncy
+    // Tuned based on feedback for smoother feel
+    this.stiffness = options.stiffness || 250;  // Lowered from 350
+    this.damping = options.damping || 45;       // Increased from 35
     this.initialVelocity = options.initialVelocity || 0;
-    
+
     // Snap points for sheet positions
     this.snapPoints = options.snapPoints || {
       closed: 0,
@@ -86,8 +87,9 @@ class SheetPhysics {
   animationFrame(timestamp) {
     // Calculate delta time (clamped to avoid large jumps)
     const deltaTime = Math.min(0.064, (timestamp - this.lastFrameTime) / 1000);
+    console.log("Delta Time:", deltaTime); // Added for debugging
     this.lastFrameTime = timestamp;
-    
+
     // Calculate spring force
     const displacement = this.targetPosition - this.position;
     const springForce = displacement * this.stiffness;
