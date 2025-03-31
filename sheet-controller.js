@@ -201,18 +201,17 @@ class SheetController {
     this.sheetElement.addEventListener('pointercancel', onPointerCancel, { passive: false });
     
     // Prevent default touch actions to avoid scrolling conflicts, but allow input focus
+    // Simplified based on feedback
     this.sheetElement.addEventListener('touchstart', e => {
-      const targetElement = e.target; // Removed 'as HTMLElement'
-      const isInputElement = targetElement.tagName === 'INPUT' || targetElement.tagName === 'TEXTAREA' || targetElement.tagName === 'SELECT';
-
-      // Only prevent default if touching the handle or when sheet is not fully expanded,
-      // AND the target is NOT an input element.
-      if (!isInputElement && (this.currentPosition !== 'full' || targetElement === this.handleElement)) {
-        e.preventDefault();
+      const targetElement = e.target;
+      // If the target is an input or textarea, do nothing (allow default browser behavior like focus)
+      if (targetElement.tagName === 'INPUT' || targetElement.tagName === 'TEXTAREA' || targetElement.tagName === 'SELECT') {
+        return;
       }
-      // Otherwise, allow the default action (e.g., focusing the input).
+      // Otherwise, prevent default to handle sheet dragging
+      e.preventDefault();
     }, { passive: false });
-    
+
     // Handle content scrolling with improved logic
     this.contentElement.addEventListener('touchstart', e => {
       // Allow scrolling in content area when sheet is expanded

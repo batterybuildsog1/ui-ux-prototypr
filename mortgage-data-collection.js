@@ -190,9 +190,10 @@ class MortgageDataCollection {
    * @param {HTMLElement} input - The input element that changed
    */
   handleInputChange(input) {
+    console.log("Input changed:", input.name, input.value); // Added for debugging
     const name = input.name;
     let value = input.value;
-    
+
     // Convert checkbox and radio values
     if (input.type === 'checkbox') {
       if (name === 'incomeSources') {
