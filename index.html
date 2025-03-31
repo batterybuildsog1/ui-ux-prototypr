@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Mortgage Data Collection - Silk UI</title>
+  <link rel="stylesheet" href="styles.css">
+  <!-- Prevent touch callout and other mobile behaviors -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <!-- Preload the font to avoid FOUT -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="app-container">
+    <div class="content-container">
+      <!-- Initial message -->
+      <div class="content-overlay" id="content-overlay">
+        <h1>Mortgage DTI Calculator</h1>
+        <p>Enter your mortgage information to calculate your debt-to-income ratio and affordability.</p>
+        <div class="swipe-indicator pulse">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 5V19M12 5L6 11M12 5L18 11" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+    
+    <div id="sheet-container" class="sheet-container">
+      <!-- Sheet content will be added here -->
+    </div>
+  </div>
+  
+  <script src="sheet-physics.js"></script>
+  <script src="sheet-controller.js"></script>
+  <script src="mortgage-data-collection.js"></script>
+  <script>
+    // Initialize components
+    document.addEventListener('DOMContentLoaded', () => {
+      try {
+        // Initialize sheet interface
+        const sheetContainer = document.getElementById('sheet-container');
+        const contentOverlay = document.getElementById('content-overlay');
+        const mortgageCollection = new MortgageDataCollection(sheetContainer);
+        
+        console.log("Components initialized successfully");
+      } catch (error) {
+        console.error("Error initializing components:", error);
+      }
+    });
+  </script>
+</body>
+</html>
