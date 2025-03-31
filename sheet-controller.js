@@ -48,6 +48,9 @@ class SheetController {
     this.physics.onUpdate = this.updateSheetPosition.bind(this);
     this.physics.onComplete = this.handleAnimationComplete.bind(this);
     
+    // Get initial viewport height
+    this.viewportHeight = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+
     // Set initial position
     this.currentPosition = options.initialPosition || 'closed';
     
@@ -123,9 +126,11 @@ class SheetController {
       const deltaY = currentY - startY;
       
       // Convert delta to position value (percentage of screen height)
-      const deltaPosition = deltaY / window.innerHeight;
+      // Use visualViewport height for accuracy on mobile
+      const currentViewportHeight = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+      const deltaPosition = deltaY / currentViewportHeight;
       let newPosition = startPosition - deltaPosition;
-      
+
       // Apply resistance when dragging beyond limits
       if (newPosition < 0) {
         // Resistance when dragging below minimum
@@ -255,10 +260,21 @@ class SheetController {
     });
     
     // Handle window resize
-    window.addEventListener('resize', () => {
-      // Update sheet position when window resizes
-      this.updateSheetPosition(this.physics.position);
-    });
+    window.addEventListener('resize', this.handleResize.bind(this));
+
+    // Listen for visual viewport resize events (e.g., keyboard)
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', this.handleResize.bind(this));
+    }
+  }
+
+  /**
+   * Handle window or visual viewport resize
+   */
+  handleResize() {
+    this.viewportHeight = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+    // Update sheet position based on the new viewport height
+    this.updateSheetPosition(this.physics.position);
   }
   
   /**
@@ -266,9 +282,9 @@ class SheetController {
    * @param {number} position - New position value
    */
   updateSheetPosition(position) {
-    // Calculate translation based on position
-    const translateY = window.innerHeight * (1 - position);
-    
+    // Calculate translation based on position using potentially updated viewport height
+    const translateY = this.viewportHeight * (1 - position);
+
     // Apply transform with will-change for performance
     const isDesktop = window.innerWidth >= 992;
     
