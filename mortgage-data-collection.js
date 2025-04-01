@@ -18,20 +18,23 @@ class MortgageDataCollection {
         closed: 0,
         docked: 0.15,
         half: 0.5,
-        full: 0.85
+        closed: 0,
+        docked: 0.15,
+        half: 0.5,
+        full: 0.95 // Override: Target 95% height for 'full' state
       },
       // Calibrated spring physics for a natural, native-like feel
       mass: 1,
-      stiffness: 320,
+      stiffness: 320, // Note: Physics constants can also be overridden here if needed
       damping: 28,
       allowOvershoot: true
     });
-    
+
     // Force the sheet to be visible after a longer delay to ensure DOM is ready
     setTimeout(() => {
-      console.log("Forcing sheet to visible position");
+      console.log("Setting initial position. Viewport Height:", this.sheetController.viewportHeight); // Added log
       this.sheetController.setPosition('half', false);
-    }, 300);
+    }, 500); // Increased timeout to 500ms
     
     // Create data model
     this.data = {

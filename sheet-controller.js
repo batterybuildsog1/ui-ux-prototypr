@@ -306,6 +306,7 @@ class SheetController {
   updateSheetPosition(position) {
     // Calculate translation based on position using potentially updated viewport height
     const translateY = this.viewportHeight * (1 - position);
+    console.log("Position:", position, "TranslateY:", translateY, "Viewport:", this.viewportHeight); // Added log
 
     // Apply transform with will-change for performance
     const isDesktop = window.innerWidth >= 992;
