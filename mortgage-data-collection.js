@@ -10,14 +10,11 @@ class MortgageDataCollection {
    */
   constructor(container) {
     this.container = container;
-    
+
     // Create our sheet controller with optimized physics for natural feel
     this.sheetController = new SheetController(container, {
       initialPosition: 'half', // Changed from 'docked' to 'half' to ensure visibility
       snapPoints: {
-        closed: 0,
-        docked: 0.15,
-        half: 0.5,
         closed: 0,
         docked: 0.15,
         half: 0.5,
@@ -35,50 +32,50 @@ class MortgageDataCollection {
       console.log("Setting initial position. Viewport Height:", this.sheetController.viewportHeight); // Added log
       this.sheetController.setPosition('half', false);
     }, 500); // Increased timeout to 500ms
-    
+
     // Create data model
     this.data = {
       // Home Purchase Goals
       targetHomePrice: '',
       downPayment: '',
       downPaymentPercent: '',
-      
+
       // Income
       monthlyIncome: '',
       incomeSources: [],
       incomeTrend: '',
-      
+
       // Debt
       carPayment: '',
       creditCardMinimums: '',
       otherDebts: '',
-      
+
       // Housing
       currentHousingExpense: '',
       residencyDuration: '',
-      
+
       // Credit
       creditScoreRange: '',
-      
+
       // Assets
       liquidCash: '',
       retirementInvestments: '',
       otherLiquidAssets: '',
-      
+
       // Payment History
       latePayments: false,
       bankruptcy: false,
-      
+
       // Medical & Collections
       medicalDebt: '',
       collectionsPayments: ''
     };
-    
+
     // Track current section and page
     this.currentSection = 'goals-income';
     this.currentPage = 1;
     this.totalPages = 4;
-    
+
     // Store form completion status
     this.completionStatus = {
       'goals-income': [false, false],
@@ -86,20 +83,20 @@ class MortgageDataCollection {
       'credit-assets': [false, false],
       'payment-medical': [false, false]
     };
-    
+
     // Load saved data if available
     this.loadData();
-    
+
     // Update completion status
     this.updateCompletionStatus();
-    
+
     // Set up event listeners
     this.setupEventListeners();
-    
+
     // Initialize content
     this.renderCurrentSection();
   }
-  
+
   /**
    * Set up event listeners for the form with improved gesture support
    */
@@ -108,7 +105,7 @@ class MortgageDataCollection {
     this.sheetController.onPositionChange(position => {
       this.handlePositionChange(position);
     });
-    
+
     // Listen for form navigation with delegate pattern for better performance
     document.addEventListener('click', e => {
       // Button handlers
@@ -131,40 +128,40 @@ class MortgageDataCollection {
         this.calculateResults();
       }
     });
-    
+
     // Listen for form input changes with debouncing
     let inputDebounceTimer;
     document.addEventListener('input', e => {
       if (e.target.name) {
         // Clear existing timeout
         clearTimeout(inputDebounceTimer);
-        
+
         // Set new timeout to update after typing stops
         inputDebounceTimer = setTimeout(() => {
           this.handleInputChange(e.target);
         }, 300);
       }
     });
-    
+
     // Add immediate update for checkbox changes
     document.addEventListener('change', e => {
       if (e.target.type === 'checkbox' || e.target.type === 'radio') {
         this.handleInputChange(e.target);
       }
     });
-    
+
     // Listen for sheet drag start/end for reactive UI
     this.sheetController.onDragStart(() => {
       // Add visual cues when dragging
       document.body.classList.add('sheet-dragging');
     });
-    
+
     this.sheetController.onDragEnd(() => {
       // Remove visual cues when dragging ends
       document.body.classList.remove('sheet-dragging');
     });
   }
-  
+
   /**
    * Handle sheet position changes with improved transitions
    * @param {string} position - New sheet position
@@ -172,7 +169,7 @@ class MortgageDataCollection {
   handlePositionChange(position) {
     // Update document body with sheet position for reactive UI
     document.body.dataset.sheetPosition = position;
-    
+
     // Adjust content based on sheet position
     if (position === 'closed') {
       // No action needed when closed
@@ -187,7 +184,7 @@ class MortgageDataCollection {
       this.renderFullForm();
     }
   }
-  
+
   /**
    * Handle input changes with validation
    * @param {HTMLElement} input - The input element that changed
@@ -213,17 +210,17 @@ class MortgageDataCollection {
         value = input.value;
       }
     }
-    
+
     // Update data model
     this.updateData(name, value);
-    
+
     // Apply validation styles if needed
     this.validateField(input);
-    
+
     // Update completion status
     this.updateCompletionStatus();
   }
-  
+
   /**
    * Validate a form field
    * @param {HTMLElement} input - The input element to validate
@@ -232,13 +229,13 @@ class MortgageDataCollection {
     // Get form group
     const formGroup = input.closest('.form-group');
     if (!formGroup) return;
-    
+
     // Check if input is empty for required fields
     if (input.required && input.value.trim() === '') {
       formGroup.classList.add('has-error');
       return false;
     }
-    
+
     // Check for numeric validation
     if (input.type === 'number' && input.value !== '') {
       const value = parseFloat(input.value);
@@ -247,13 +244,13 @@ class MortgageDataCollection {
         return false;
       }
     }
-    
+
     // Field is valid
     formGroup.classList.remove('has-error');
     formGroup.classList.add('is-valid');
     return true;
   }
-  
+
   /**
    * Handle checkbox changes for array values
    * @param {HTMLElement} checkbox - The checkbox element that changed
@@ -262,13 +259,13 @@ class MortgageDataCollection {
     const name = checkbox.name;
     const value = checkbox.value;
     const checked = checkbox.checked;
-    
+
     // Handle array values (checkboxes)
     if (name === 'incomeSources') {
       if (!Array.isArray(this.data[name])) {
         this.data[name] = [];
       }
-      
+
       if (checked) {
         // Add to array if not already present
         if (!this.data[name].includes(value)) {
@@ -278,15 +275,15 @@ class MortgageDataCollection {
         // Remove from array
         this.data[name] = this.data[name].filter(item => item !== value);
       }
-      
+
       // Save data
       this.saveData();
-      
+
       // Update completion status
       this.updateCompletionStatus();
     }
   }
-  
+
   /**
    * Update completion status for sections and pages
    */
@@ -298,48 +295,48 @@ class MortgageDataCollection {
       'credit-assets': [false, false],
       'payment-medical': [false, false]
     };
-    
+
     // Check completion status for each section/page
-    
+
     // Home Purchase Goals
     if (this.data.targetHomePrice && this.data.downPayment) {
       this.completionStatus['goals-income'][0] = true;
     }
-    
+
     // Income Snapshot
     if (this.data.monthlyIncome && this.data.incomeSources.length > 0 && this.data.incomeTrend) {
       this.completionStatus['goals-income'][1] = true;
     }
-    
+
     // Debt Obligations
     if ((this.data.carPayment !== '' || this.data.creditCardMinimums !== '')) {
       this.completionStatus['debt-housing'][0] = true;
     }
-    
+
     // Housing Costs
     if (this.data.currentHousingExpense !== '') {
       this.completionStatus['debt-housing'][1] = true;
     }
-    
+
     // Credit Health
     if (this.data.creditScoreRange) {
       this.completionStatus['credit-assets'][0] = true;
     }
-    
+
     // Financial Reserves
     if (this.data.liquidCash !== '') {
       this.completionStatus['credit-assets'][1] = true;
     }
-    
+
     // Payment History
     if (this.data.latePayments !== undefined && this.data.bankruptcy !== undefined) {
       this.completionStatus['payment-medical'][0] = true;
     }
-    
+
     // Medical & Collections Debt
     this.completionStatus['payment-medical'][1] = true; // Optional section
   }
-  
+
   /**
    * Update data model with improved validation and formatting
    * @param {string} field - Field name
@@ -347,21 +344,21 @@ class MortgageDataCollection {
    */
   updateData(field, value) {
     this.data[field] = value;
-    
+
     // Handle special cases with improved calculations
     if (field === 'downPayment' && this.data.targetHomePrice) {
       const targetPrice = parseFloat(this.data.targetHomePrice);
       const downPayment = parseFloat(value);
-      
+
       if (!isNaN(targetPrice) && !isNaN(downPayment) && targetPrice > 0) {
         const percent = (downPayment / targetPrice) * 100;
         this.data.downPaymentPercent = percent.toFixed(1);
-        
+
         // Update display if needed
         const percentElement = document.getElementById('down-payment-percent');
         if (percentElement) {
           percentElement.textContent = `${this.data.downPaymentPercent}%`;
-          
+
           // Add animation class to highlight the update
           percentElement.classList.remove('updated');
           // Trigger reflow to restart animation
@@ -372,16 +369,16 @@ class MortgageDataCollection {
     } else if (field === 'targetHomePrice' && this.data.downPayment) {
       const targetPrice = parseFloat(value);
       const downPayment = parseFloat(this.data.downPayment);
-      
+
       if (!isNaN(targetPrice) && !isNaN(downPayment) && targetPrice > 0) {
         const percent = (downPayment / targetPrice) * 100;
         this.data.downPaymentPercent = percent.toFixed(1);
-        
+
         // Update display if needed
         const percentElement = document.getElementById('down-payment-percent');
         if (percentElement) {
           percentElement.textContent = `${this.data.downPaymentPercent}%`;
-          
+
           // Add animation class to highlight the update
           percentElement.classList.remove('updated');
           // Trigger reflow to restart animation
@@ -390,16 +387,16 @@ class MortgageDataCollection {
         }
       }
     }
-    
+
     // Format currency values for display
-    if (field.includes('Price') || field.includes('Payment') || field.includes('Income') || 
+    if (field.includes('Price') || field.includes('Payment') || field.includes('Income') ||
         field.includes('Debt') || field.includes('Cash') || field.includes('Investments')) {
-      
+
       // Format as currency if it's a number
       const numValue = parseFloat(value);
       if (!isNaN(numValue)) {
         const formattedValue = this.formatCurrency(numValue);
-        
+
         // Update display value if an input element exists
         const inputElement = document.getElementById(field);
         if (inputElement && inputElement.type === 'number') {
@@ -408,11 +405,11 @@ class MortgageDataCollection {
         }
       }
     }
-    
+
     // Save data to localStorage for persistence
     this.saveData();
   }
-  
+
   /**
    * Format a number as currency
    * @param {number} value - Value to format
@@ -426,7 +423,7 @@ class MortgageDataCollection {
       maximumFractionDigits: 0
     }).format(value);
   }
-  
+
   /**
    * Save data to localStorage with error handling
    */
@@ -437,7 +434,7 @@ class MortgageDataCollection {
       console.error('Error saving data:', e);
     }
   }
-  
+
   /**
    * Load data from localStorage with error handling
    */
@@ -451,9 +448,9 @@ class MortgageDataCollection {
       console.error('Error loading saved data:', e);
     }
   }
-  
+
   /**
-   * Go to next page with enhanced animations 
+   * Go to next page with enhanced animations
    */
   nextPage() {
     if (this.currentPage < this.totalPages) {
@@ -480,7 +477,7 @@ class MortgageDataCollection {
       }, 150);
     }
   }
-  
+
   /**
    * Go to previous page with enhanced animations
    */
@@ -509,7 +506,7 @@ class MortgageDataCollection {
       }, 150);
     }
   }
-  
+
   /**
    * Change form section with enhanced animations
    * @param {string} section - Section ID
@@ -518,13 +515,13 @@ class MortgageDataCollection {
     if (this.currentSection === section) {
       return;
     }
-    
+
     // Calculate whether we're moving forward or backward
     const sections = ['goals-income', 'debt-housing', 'credit-assets', 'payment-medical'];
     const currentIndex = sections.indexOf(this.currentSection);
     const newIndex = sections.indexOf(section);
     const isForward = newIndex > currentIndex;
-    
+
     // Apply transition animation
     // Apply fade-out transition (optional, can be handled by CSS if preferred)
     const content = this.sheetController.getContentElement();
@@ -548,13 +545,13 @@ class MortgageDataCollection {
       }, 200);
     }, 200);
   }
-  
+
   /**
    * Render current section based on state
    */
   renderCurrentSection() {
     const position = this.sheetController.getPosition();
-    
+
     if (position === 'docked') {
       this.renderSummaryView();
     } else if (position === 'half') {
@@ -563,7 +560,7 @@ class MortgageDataCollection {
       this.renderFullForm();
     }
   }
-  
+
   /**
    * Render summary view for docked position with improved design
    */
@@ -571,12 +568,12 @@ class MortgageDataCollection {
     // Create a simple summary of entered data
     const content = document.createElement('div');
     content.className = 'summary-view';
-    
+
     // Add title with icon
     const title = document.createElement('h2');
     title.textContent = 'Mortgage DTI Calculator';
     content.appendChild(title);
-    
+
     // Check if we have any data and show a progress summary
     let hasData = false;
     for (const key in this.data) {
@@ -588,26 +585,26 @@ class MortgageDataCollection {
         break;
       }
     }
-    
+
     if (hasData) {
       // Show a summary of completion status
       const summary = document.createElement('div');
       summary.className = 'completion-summary';
-      
+
       // Count completed sections
       let completedSections = 0;
       let totalSections = 0;
-      
+
       for (const section in this.completionStatus) {
         for (const pageStatus of this.completionStatus[section]) {
           if (pageStatus) completedSections++;
           totalSections++;
         }
       }
-      
+
       // Calculate percentage
       const completionPercentage = Math.round((completedSections / totalSections) * 100);
-      
+
       // Create progress ring
       summary.innerHTML = `
         <div class="progress-circle" style="--progress: ${completionPercentage}%">
@@ -618,7 +615,7 @@ class MortgageDataCollection {
         </div>
         <p>Continue filling in your information to calculate your DTI and affordability.</p>
       `;
-      
+
       content.appendChild(summary);
     } else {
       // Add prompt to continue
@@ -627,7 +624,7 @@ class MortgageDataCollection {
       prompt.className = 'swipe-prompt';
       content.appendChild(prompt);
     }
-    
+
     // Add button to expand
     const expandButton = document.createElement('button');
     expandButton.innerHTML = `
@@ -638,10 +635,10 @@ class MortgageDataCollection {
     `;
     expandButton.className = 'expand-button button-with-icon';
     content.appendChild(expandButton);
-    
+
     this.sheetController.setContent(content);
   }
-  
+
   /**
    * Render detailed form for half position with improved design
    */
@@ -649,19 +646,19 @@ class MortgageDataCollection {
     // Main form view with page navigation
     const content = document.createElement('div');
     content.className = 'detailed-form';
-    
+
     // Add progress indicator with improved design
     const progress = document.createElement('div');
     progress.className = 'progress-indicator';
-    
+
     // Add current section name for context
     const sectionName = {
       'goals-income': 'Goals & Income',
-      'debt-housing': 'Debt & Housing', 
+      'debt-housing': 'Debt & Housing',
       'credit-assets': 'Credit & Assets',
       'payment-medical': 'Payment History'
     }[this.currentSection];
-    
+
     progress.innerHTML = `
       <div class="progress-bar">
         <div class="progress-fill" style="width: ${(this.currentPage / this.totalPages) * 100}%"></div>
@@ -672,15 +669,15 @@ class MortgageDataCollection {
       </div>
     `;
     content.appendChild(progress);
-    
+
     // Add form content based on current page
     const formContent = this.getFormContent();
     content.appendChild(formContent);
-    
+
     // Add navigation buttons with improved design
     const navigation = document.createElement('div');
     navigation.className = 'form-navigation';
-    
+
     if (this.currentPage > 1) {
       const prevButton = document.createElement('button');
       prevButton.innerHTML = `
@@ -692,7 +689,7 @@ class MortgageDataCollection {
       prevButton.className = 'prev-button button-with-icon';
       navigation.appendChild(prevButton);
     }
-    
+
     if (this.currentPage < this.totalPages) {
       const nextButton = document.createElement('button');
       nextButton.innerHTML = `
@@ -715,12 +712,12 @@ class MortgageDataCollection {
       submitButton.className = 'submit-button button-with-icon';
       navigation.appendChild(submitButton);
     }
-    
+
     content.appendChild(navigation);
-    
+
     this.sheetController.setContent(content);
   }
-  
+
   /**
    * Render full form view for full position with improved design
    */
@@ -728,48 +725,48 @@ class MortgageDataCollection {
     // Full form view with all sections
     const content = document.createElement('div');
     content.className = 'full-form';
-    
+
     // Add title with subtle animation
     const title = document.createElement('h2');
     title.textContent = 'Mortgage Information';
     title.className = 'fade-in-up';
     content.appendChild(title);
-    
+
     // Add section navigation with improved design
     const sections = document.createElement('div');
     sections.className = 'section-navigation';
-    
+
     const sectionsList = [
       { id: 'goals-income', name: 'Goals & Income', icon: 'target' },
       { id: 'debt-housing', name: 'Debt & Housing', icon: 'home' },
       { id: 'credit-assets', name: 'Credit & Assets', icon: 'credit-card' },
       { id: 'payment-medical', name: 'Payment History', icon: 'clock' }
     ];
-    
+
     sectionsList.forEach(section => {
       const button = document.createElement('button');
-      
+
       // Get completion status for this section
       const isComplete = this.completionStatus[section.id].every(status => status);
-      
+
       // Add completion indicator
       button.innerHTML = `
         ${section.name}
         ${isComplete ? '<span class="completion-dot"></span>' : ''}
       `;
-      
+
       button.className = `section-button ${this.currentSection === section.id ? 'active' : ''}`;
       if (isComplete) button.classList.add('completed');
       button.dataset.section = section.id;
       sections.appendChild(button);
     });
-    
+
     content.appendChild(sections);
-    
+
     // Add form content based on current section
     const formContent = this.getFormContent();
     content.appendChild(formContent);
-    
+
     // Add calculate button with improved design
     const calculateButton = document.createElement('button');
     calculateButton.innerHTML = `
@@ -784,10 +781,10 @@ class MortgageDataCollection {
     `;
     calculateButton.className = 'calculate-button button-with-icon';
     content.appendChild(calculateButton);
-    
+
     this.sheetController.setContent(content);
   }
-  
+
   /**
    * Get form content based on current section and page with enhanced design
    * @returns {HTMLElement} Form element
@@ -797,22 +794,22 @@ class MortgageDataCollection {
     const form = document.createElement('form');
     form.className = 'mortgage-form';
     form.setAttribute('novalidate', 'true'); // We'll handle validation ourselves
-    
+
     if (this.currentSection === 'goals-income') {
       if (this.currentPage === 1) {
         // Home Purchase Goals
         form.innerHTML = `
           <div class="form-section">
             <h3>Home Purchase Goals</h3>
-            
+
             <div class="form-group">
               <label for="targetHomePrice">Target Home Price</label>
               <div class="input-with-prefix">
                 <span class="prefix">$</span>
-                <input 
-                  type="number" 
-                  id="targetHomePrice" 
-                  name="targetHomePrice" 
+                <input
+                  type="number"
+                  id="targetHomePrice"
+                  name="targetHomePrice"
                   value="${this.data.targetHomePrice}"
                   placeholder="Enter amount"
                   required
@@ -820,15 +817,15 @@ class MortgageDataCollection {
               </div>
               <p class="help-text">What's the estimated purchase price of your home?</p>
             </div>
-            
+
             <div class="form-group">
               <label for="downPayment">Down Payment</label>
               <div class="input-with-prefix">
                 <span class="prefix">$</span>
-                <input 
-                  type="number" 
-                  id="downPayment" 
-                  name="downPayment" 
+                <input
+                  type="number"
+                  id="downPayment"
+                  name="downPayment"
                   value="${this.data.downPayment}"
                   placeholder="Enter amount"
                   required
@@ -854,15 +851,15 @@ class MortgageDataCollection {
         form.innerHTML = `
           <div class="form-section">
             <h3>Income Snapshot</h3>
-            
+
             <div class="form-group">
               <label for="monthlyIncome">Monthly Income</label>
               <div class="input-with-prefix">
                 <span class="prefix">$</span>
-                <input 
-                  type="number" 
-                  id="monthlyIncome" 
-                  name="monthlyIncome" 
+                <input
+                  type="number"
+                  id="monthlyIncome"
+                  name="monthlyIncome"
                   value="${this.data.monthlyIncome}"
                   placeholder="Enter monthly income"
                   required
@@ -870,78 +867,78 @@ class MortgageDataCollection {
               </div>
               <p class="help-text">What is your total monthly income before taxes?</p>
             </div>
-            
+
             <div class="form-group">
               <label>Income Sources</label>
               <div class="checkbox-group">
                 <label class="checkbox-label">
-                  <input 
-                    type="checkbox" 
-                    name="incomeSources" 
-                    value="Salary" 
+                  <input
+                    type="checkbox"
+                    name="incomeSources"
+                    value="Salary"
                     ${this.data.incomeSources?.includes('Salary') ? 'checked' : ''}
-                  /> 
+                  />
                   <span>Salary</span>
                 </label>
                 <label class="checkbox-label">
-                  <input 
-                    type="checkbox" 
-                    name="incomeSources" 
-                    value="Hourly" 
+                  <input
+                    type="checkbox"
+                    name="incomeSources"
+                    value="Hourly"
                     ${this.data.incomeSources?.includes('Hourly') ? 'checked' : ''}
-                  /> 
+                  />
                   <span>Hourly</span>
                 </label>
                 <label class="checkbox-label">
-                  <input 
-                    type="checkbox" 
-                    name="incomeSources" 
-                    value="Overtime" 
+                  <input
+                    type="checkbox"
+                    name="incomeSources"
+                    value="Overtime"
                     ${this.data.incomeSources?.includes('Overtime') ? 'checked' : ''}
-                  /> 
+                  />
                   <span>Overtime</span>
                 </label>
                 <label class="checkbox-label">
-                  <input 
-                    type="checkbox" 
-                    name="incomeSources" 
-                    value="Tips" 
+                  <input
+                    type="checkbox"
+                    name="incomeSources"
+                    value="Tips"
                     ${this.data.incomeSources?.includes('Tips') ? 'checked' : ''}
-                  /> 
+                  />
                   <span>Tips</span>
                 </label>
               </div>
               <p class="help-text">Which sources contribute to your income?</p>
             </div>
-            
+
             <div class="form-group">
               <label>Income Trend</label>
               <div class="radio-group">
                 <label class="radio-label">
-                  <input 
-                    type="radio" 
-                    name="incomeTrend" 
-                    value="Increased" 
+                  <input
+                    type="radio"
+                    name="incomeTrend"
+                    value="Increased"
                     ${this.data.incomeTrend === 'Increased' ? 'checked' : ''}
-                  /> 
+                  />
                   <span>Increased</span>
                 </label>
                 <label class="radio-label">
-                  <input 
-                    type="radio" 
-                    name="incomeTrend" 
-                    value="Stable" 
+                  <input
+                    type="radio"
+                    name="incomeTrend"
+                    value="Stable"
                     ${this.data.incomeTrend === 'Stable' ? 'checked' : ''}
-                  /> 
+                  />
                   <span>Stable</span>
                 </label>
                 <label class="radio-label">
-                  <input 
-                    type="radio" 
-                    name="incomeTrend" 
-                    value="Decreased" 
+                  <input
+                    type="radio"
+                    name="incomeTrend"
+                    value="Decreased"
                     ${this.data.incomeTrend === 'Decreased' ? 'checked' : ''}
-                  /> 
+                  />
                   <span>Decreased</span>
                 </label>
               </div>
@@ -956,42 +953,42 @@ class MortgageDataCollection {
         form.innerHTML = `
           <div class="form-section">
             <h3>Debt Obligations</h3>
-            
+
             <div class="form-group">
               <label for="carPayment">Car Payment</label>
               <div class="input-with-prefix">
                 <span class="prefix">$</span>
-                <input 
-                  type="number" 
-                  id="carPayment" 
-                  name="carPayment" 
+                <input
+                  type="number"
+                  id="carPayment"
+                  name="carPayment"
                   value="${this.data.carPayment}"
                   placeholder="Enter monthly payment"
                 />
               </div>
               <p class="help-text">What is your monthly car payment? Enter 0 if none.</p>
             </div>
-            
+
             <div class="form-group">
               <label for="creditCardMinimums">Credit Card Minimums</label>
               <div class="input-with-prefix">
                 <span class="prefix">$</span>
-                <input 
-                  type="number" 
-                  id="creditCardMinimums" 
-                  name="creditCardMinimums" 
+                <input
+                  type="number"
+                  id="creditCardMinimums"
+                  name="creditCardMinimums"
                   value="${this.data.creditCardMinimums}"
                   placeholder="Enter monthly minimum"
                 />
               </div>
               <p class="help-text">What is the total minimum monthly payment on your credit cards?</p>
             </div>
-            
+
             <div class="form-group">
               <label for="otherDebts">Other Debts</label>
-              <textarea 
-                id="otherDebts" 
-                name="otherDebts" 
+              <textarea
+                id="otherDebts"
+                name="otherDebts"
                 placeholder="List any additional monthly debts (e.g., student loans, alimony, child support, leases) and their amounts."
               >${this.data.otherDebts}</textarea>
               <p class="help-text">Include any other recurring monthly obligations.</p>
@@ -1003,15 +1000,15 @@ class MortgageDataCollection {
         form.innerHTML = `
           <div class="form-section">
             <h3>Housing Costs</h3>
-            
+
             <div class="form-group">
               <label for="currentHousingExpense">Current Housing Expense</label>
               <div class="input-with-prefix">
                 <span class="prefix">$</span>
-                <input 
-                  type="number" 
-                  id="currentHousingExpense" 
-                  name="currentHousingExpense" 
+                <input
+                  type="number"
+                  id="currentHousingExpense"
+                  name="currentHousingExpense"
                   value="${this.data.currentHousingExpense}"
                   placeholder="Enter monthly amount"
                   required
@@ -1019,13 +1016,13 @@ class MortgageDataCollection {
               </div>
               <p class="help-text">How much do you currently pay for housing (rent or mortgage) each month?</p>
             </div>
-            
+
             <div class="form-group">
               <label for="residencyDuration">Residency Duration</label>
-              <input 
-                type="text" 
-                id="residencyDuration" 
-                name="residencyDuration" 
+              <input
+                type="text"
+                id="residencyDuration"
+                name="residencyDuration"
                 value="${this.data.residencyDuration}"
                 placeholder="e.g., 2 years, 6 months"
               />
@@ -1048,44 +1045,44 @@ class MortgageDataCollection {
         form.innerHTML = `
           <div class="form-section">
             <h3>Credit Health</h3>
-            
+
             <div class="form-group">
               <label>Credit Score Range</label>
               <div class="radio-group">
                 <label class="radio-label">
-                  <input 
-                    type="radio" 
-                    name="creditScoreRange" 
-                    value="Below 580" 
+                  <input
+                    type="radio"
+                    name="creditScoreRange"
+                    value="Below 580"
                     ${this.data.creditScoreRange === 'Below 580' ? 'checked' : ''}
-                  /> 
+                  />
                   <span>Below 580</span>
                 </label>
                 <label class="radio-label">
-                  <input 
-                    type="radio" 
-                    name="creditScoreRange" 
-                    value="580-600" 
+                  <input
+                    type="radio"
+                    name="creditScoreRange"
+                    value="580-600"
                     ${this.data.creditScoreRange === '580-600' ? 'checked' : ''}
-                  /> 
+                  />
                   <span>580-600</span>
                 </label>
                 <label class="radio-label">
-                  <input 
-                    type="radio" 
-                    name="creditScoreRange" 
-                    value="600-620" 
+                  <input
+                    type="radio"
+                    name="creditScoreRange"
+                    value="600-620"
                     ${this.data.creditScoreRange === '600-620' ? 'checked' : ''}
-                  /> 
+                  />
                   <span>600-620</span>
                 </label>
                 <label class="radio-label">
-                  <input 
-                    type="radio" 
-                    name="creditScoreRange" 
-                    value="Above 620" 
+                  <input
+                    type="radio"
+                    name="creditScoreRange"
+                    value="Above 620"
                     ${this.data.creditScoreRange === 'Above 620' ? 'checked' : ''}
-                  /> 
+                  />
                   <span>Above 620</span>
                 </label>
               </div>
@@ -1106,15 +1103,15 @@ class MortgageDataCollection {
         form.innerHTML = `
           <div class="form-section">
             <h3>Financial Reserves</h3>
-            
+
             <div class="form-group">
               <label for="liquidCash">Liquid Cash</label>
               <div class="input-with-prefix">
                 <span class="prefix">$</span>
-                <input 
-                  type="number" 
-                  id="liquidCash" 
-                  name="liquidCash" 
+                <input
+                  type="number"
+                  id="liquidCash"
+                  name="liquidCash"
                   value="${this.data.liquidCash}"
                   placeholder="Enter amount"
                   required
@@ -1122,30 +1119,30 @@ class MortgageDataCollection {
               </div>
               <p class="help-text">How much cash do you have readily available (checking, savings)?</p>
             </div>
-            
+
             <div class="form-group">
               <label for="retirementInvestments">Retirement & Investments</label>
               <div class="input-with-prefix">
                 <span class="prefix">$</span>
-                <input 
-                  type="number" 
-                  id="retirementInvestments" 
-                  name="retirementInvestments" 
+                <input
+                  type="number"
+                  id="retirementInvestments"
+                  name="retirementInvestments"
                   value="${this.data.retirementInvestments}"
                   placeholder="Enter total amount"
                 />
               </div>
               <p class="help-text">What is the total amount in your retirement or investment accounts?</p>
             </div>
-            
+
             <div class="form-group">
               <label for="otherLiquidAssets">Other Liquid Assets</label>
               <div class="input-with-prefix">
                 <span class="prefix">$</span>
-                <input 
-                  type="number" 
-                  id="otherLiquidAssets" 
-                  name="otherLiquidAssets" 
+                <input
+                  type="number"
+                  id="otherLiquidAssets"
+                  name="otherLiquidAssets"
                   value="${this.data.otherLiquidAssets}"
                   placeholder="Enter amount"
                 />
@@ -1161,51 +1158,51 @@ class MortgageDataCollection {
         form.innerHTML = `
           <div class="form-section">
             <h3>Payment History</h3>
-            
+
             <div class="form-group">
               <label>Late Payments</label>
               <div class="radio-group">
                 <label class="radio-label">
-                  <input 
-                    type="radio" 
-                    name="latePayments" 
-                    value="true" 
+                  <input
+                    type="radio"
+                    name="latePayments"
+                    value="true"
                     ${this.data.latePayments === true ? 'checked' : ''}
-                  /> 
+                  />
                   <span>Yes</span>
                 </label>
                 <label class="radio-label">
-                  <input 
-                    type="radio" 
-                    name="latePayments" 
-                    value="false" 
+                  <input
+                    type="radio"
+                    name="latePayments"
+                    value="false"
                     ${this.data.latePayments === false ? 'checked' : ''}
-                  /> 
+                  />
                   <span>No</span>
                 </label>
               </div>
               <p class="help-text">Have you had any payments over 30 days late in the last 24 months?</p>
             </div>
-            
+
             <div class="form-group">
               <label>Recent Bankruptcies</label>
               <div class="radio-group">
                 <label class="radio-label">
-                  <input 
-                    type="radio" 
-                    name="bankruptcy" 
-                    value="true" 
+                  <input
+                    type="radio"
+                    name="bankruptcy"
+                    value="true"
                     ${this.data.bankruptcy === true ? 'checked' : ''}
-                  /> 
+                  />
                   <span>Yes</span>
                 </label>
                 <label class="radio-label">
-                  <input 
-                    type="radio" 
-                    name="bankruptcy" 
-                    value="false" 
+                  <input
+                    type="radio"
+                    name="bankruptcy"
+                    value="false"
                     ${this.data.bankruptcy === false ? 'checked' : ''}
-                  /> 
+                  />
                   <span>No</span>
                 </label>
               </div>
@@ -1218,30 +1215,30 @@ class MortgageDataCollection {
         form.innerHTML = `
           <div class="form-section">
             <h3>Medical & Collections Debt</h3>
-            
+
             <div class="form-group">
               <label for="medicalDebt">Outstanding Medical Debt</label>
               <div class="input-with-prefix">
                 <span class="prefix">$</span>
-                <input 
-                  type="number" 
-                  id="medicalDebt" 
-                  name="medicalDebt" 
+                <input
+                  type="number"
+                  id="medicalDebt"
+                  name="medicalDebt"
                   value="${this.data.medicalDebt}"
                   placeholder="Enter amount"
                 />
               </div>
               <p class="help-text">Do you have any outstanding medical debts? Enter 0 if none.</p>
             </div>
-            
+
             <div class="form-group">
               <label for="collectionsPayments">Collections Payments</label>
               <div class="input-with-prefix">
                 <span class="prefix">$</span>
-                <input 
-                  type="number" 
-                  id="collectionsPayments" 
-                  name="collectionsPayments" 
+                <input
+                  type="number"
+                  id="collectionsPayments"
+                  name="collectionsPayments"
                   value="${this.data.collectionsPayments}"
                   placeholder="Enter monthly total"
                 />
@@ -1252,17 +1249,17 @@ class MortgageDataCollection {
         `;
       }
     }
-    
+
     return form;
   }
-  
+
   /**
    * Calculate DTI results with improved animation
    */
   calculateResults() {
     // Show loading state with animation
     this.showLoadingState();
-    
+
     // Use setTimeout to give the UI time to update
     setTimeout(() => {
       // Calculate DTI
@@ -1271,14 +1268,14 @@ class MortgageDataCollection {
       const creditCardMinimums = parseFloat(this.data.creditCardMinimums) || 0;
       const currentHousingExpense = parseFloat(this.data.currentHousingExpense) || 0;
       const collectionsPayments = parseFloat(this.data.collectionsPayments) || 0;
-      
+
       const totalDebt = carPayment + creditCardMinimums + currentHousingExpense + collectionsPayments;
       const dti = monthlyIncome > 0 ? (totalDebt / monthlyIncome) * 100 : 0;
-      
+
       // Determine max DTI based on factors with enhanced algorithm
       let maxDti = 43; // Standard maximum
       let dtiFactors = [];
-      
+
       // Adjust for credit score
       if (this.data.creditScoreRange === 'Above 620') {
         maxDti += 2;
@@ -1290,11 +1287,11 @@ class MortgageDataCollection {
         maxDti -= 5;
         dtiFactors.push({ factor: 'Lower credit score', effect: '-5%' });
       }
-      
+
       // Adjust for mitigating factors
       const liquidCash = parseFloat(this.data.liquidCash) || 0;
       const targetHomePrice = parseFloat(this.data.targetHomePrice) || 0;
-      
+
       // If liquid cash is more than 20% of home price, allow higher DTI
       if (targetHomePrice > 0 && (liquidCash / targetHomePrice) > 0.2) {
         maxDti += 2;
@@ -1303,7 +1300,7 @@ class MortgageDataCollection {
         maxDti += 1;
         dtiFactors.push({ factor: 'Moderate cash reserves', effect: '+1%' });
       }
-      
+
       // If income is increasing, allow higher DTI
       if (this.data.incomeTrend === 'Increased') {
         maxDti += 1;
@@ -1312,7 +1309,7 @@ class MortgageDataCollection {
         maxDti -= 1;
         dtiFactors.push({ factor: 'Decreasing income', effect: '-1%' });
       }
-      
+
       // If stable residency, allow higher DTI
       if (this.data.residencyDuration && this.data.residencyDuration.includes('year')) {
         const yearsMatch = this.data.residencyDuration.match(/(\d+)\s*year/);
@@ -1321,52 +1318,52 @@ class MortgageDataCollection {
           dtiFactors.push({ factor: 'Stable housing history', effect: '+1%' });
         }
       }
-      
+
       // If recent bankruptcies, reduce DTI
       if (this.data.bankruptcy === true) {
         maxDti -= 3;
         dtiFactors.push({ factor: 'Recent bankruptcy', effect: '-3%' });
       }
-      
+
       // If late payments, reduce DTI
       if (this.data.latePayments === true) {
         maxDti -= 2;
         dtiFactors.push({ factor: 'Recent late payments', effect: '-2%' });
       }
-      
+
       // Ensure DTI doesn't go below minimum or above maximum
       maxDti = Math.max(33, Math.min(50, maxDti));
-      
+
       // Calculate max monthly payment
       const nonHousingDebt = carPayment + creditCardMinimums + collectionsPayments;
       const maxMonthlyPayment = (monthlyIncome * (maxDti / 100)) - nonHousingDebt;
-      
+
       // Store calculated values and factors
       this.calculatedDti = dti;
       this.calculatedMaxDti = maxDti;
       this.calculatedMaxMonthlyPayment = maxMonthlyPayment;
       this.dtiFactors = dtiFactors;
-      
+
       // Show results
       this.showResults(dti, maxDti, dtiFactors);
     }, 1200); // Slightly longer calculation time for effect
   }
-  
+
   /**
    * Show loading state while calculating with improved animation
    */
   showLoadingState() {
     const content = document.createElement('div');
     content.className = 'loading-view';
-    
+
     content.innerHTML = `
       <div class="loading"></div>
       <p>Calculating your DTI ratio...</p>
     `;
-    
+
     this.sheetController.setContent(content);
   }
-  
+
   /**
    * Show calculation results with improved design and animations
    * @param {number} dti - Calculated DTI
@@ -1377,20 +1374,20 @@ class MortgageDataCollection {
     // Create results view
     const content = document.createElement('div');
     content.className = 'results-view';
-    
+
     // Add title
     const title = document.createElement('h2');
     title.textContent = 'DTI Analysis Results';
     content.appendChild(title);
-    
+
     // Add DTI information with improved visualization
     const dtiInfo = document.createElement('div');
     dtiInfo.className = 'dti-info';
-    
+
     // Create a visual indicator for DTI status
     const dtiStatus = dti <= maxDti ? 'positive' : 'negative';
     const statusClass = dtiStatus === 'positive' ? 'status-positive' : 'status-negative';
-    
+
     const currentDti = document.createElement('div');
     currentDti.className = `dti-card ${statusClass}`;
     currentDti.innerHTML = `
@@ -1399,7 +1396,7 @@ class MortgageDataCollection {
       <p class="status-text">${dtiStatus === 'positive' ? 'Within acceptable range' : 'Exceeds maximum'}</p>
     `;
     dtiInfo.appendChild(currentDti);
-    
+
     const maxDtiCard = document.createElement('div');
     maxDtiCard.className = 'dti-card';
     maxDtiCard.innerHTML = `
@@ -1408,13 +1405,13 @@ class MortgageDataCollection {
       <p class="status-text">Based on your profile</p>
     `;
     dtiInfo.appendChild(maxDtiCard);
-    
+
     content.appendChild(dtiInfo);
-    
+
     // Add explanation with factor breakdown
     const explanation = document.createElement('div');
     explanation.className = 'results-explanation';
-    
+
     let factorsHtml = '';
     if (dtiFactors && dtiFactors.length > 0) {
       factorsHtml = `
@@ -1429,13 +1426,13 @@ class MortgageDataCollection {
         </ul>
       `;
     }
-    
+
     explanation.innerHTML = `
       <p>Your debt-to-income ratio (DTI) is the percentage of your monthly income that goes toward paying debts.</p>
       ${factorsHtml}
     `;
     content.appendChild(explanation);
-    
+
     // Add next steps with improved design
     const nextSteps = document.createElement('div');
     nextSteps.className = 'next-steps';
@@ -1457,11 +1454,11 @@ class MortgageDataCollection {
       </button>
     `;
     content.appendChild(nextSteps);
-    
+
     this.sheetController.setContent(content);
     this.sheetController.setPosition('full');
   }
-  
+
   /**
    * Show affordability calculation with improved design
    * @param {number} maxDti - Maximum DTI
@@ -1472,25 +1469,25 @@ class MortgageDataCollection {
     const carPayment = parseFloat(this.data.carPayment) || 0;
     const creditCardMinimums = parseFloat(this.data.creditCardMinimums) || 0;
     const collectionsPayments = parseFloat(this.data.collectionsPayments) || 0;
-    
+
     const nonHousingDebt = carPayment + creditCardMinimums + collectionsPayments;
     const maxMonthlyPayment = (monthlyIncome * (maxDti / 100)) - nonHousingDebt;
-    
+
     // Store the calculated max monthly payment
     this.calculatedMaxMonthlyPayment = maxMonthlyPayment;
-    
+
     // Calculate estimated home price range based on payment
     const interestRate = 6.5; // Estimated current mortgage rate
     const years = 30; // Standard loan term
     const monthlyRate = interestRate / 100 / 12;
     const payments = years * 12;
-    
+
     // Estimate monthly taxes, insurance, and PMI as percentage of loan
     const taxesAndInsurance = monthlyIncome * 0.05; // Estimated at 5% of monthly income
-    
+
     // Calculate loan amount using payment minus taxes/insurance
     const paymentForPrincipalAndInterest = Math.max(0, maxMonthlyPayment - taxesAndInsurance);
-    
+
     // Use mortgage formula: P = L[c(1 + c)^n]/[(1 + c)^n - 1]
     // Solved for L (loan amount): L = P[((1 + c)^n - 1)]/[c(1 + c)^n]
     let estimatedPrice = 0;
@@ -1498,31 +1495,31 @@ class MortgageDataCollection {
       const numerator = (Math.pow(1 + monthlyRate, payments) - 1);
       const denominator = monthlyRate * Math.pow(1 + monthlyRate, payments);
       const loanAmount = paymentForPrincipalAndInterest * (numerator / denominator);
-      
+
       // Assuming 20% down payment
       estimatedPrice = loanAmount / 0.8;
     }
-    
+
     // Create affordability view
     const content = document.createElement('div');
     content.className = 'affordability-view';
-    
+
     // Add title
     const title = document.createElement('h2');
     title.textContent = 'Affordability Analysis';
     content.appendChild(title);
-    
+
     // Add affordability information with improved visualization
     const affordabilityInfo = document.createElement('div');
     affordabilityInfo.className = 'affordability-info';
-    
+
     affordabilityInfo.innerHTML = `
       <div class="affordability-card">
         <h3>Maximum Monthly Payment</h3>
         <div class="affordability-value">$${maxMonthlyPayment.toFixed(0)}</div>
         <p class="help-text">Based on your maximum DTI of ${maxDti.toFixed(1)}%</p>
       </div>
-      
+
       <div class="affordability-card">
         <h3>Estimated Home Price</h3>
         <div class="affordability-value">$${estimatedPrice.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}</div>
@@ -1530,7 +1527,7 @@ class MortgageDataCollection {
       </div>
     `;
     content.appendChild(affordabilityInfo);
-    
+
     // Add explanation with improved breakdown
     const explanation = document.createElement('div');
     explanation.className = 'affordability-explanation';
@@ -1543,7 +1540,7 @@ class MortgageDataCollection {
       <p>This is based on a 30-year fixed mortgage at an estimated rate of ${interestRate}%.</p>
     `;
     content.appendChild(explanation);
-    
+
     // Add back button with icon
     const backButton = document.createElement('button');
     backButton.innerHTML = `
@@ -1554,7 +1551,7 @@ class MortgageDataCollection {
     `;
     backButton.className = 'back-button button-with-icon';
     content.appendChild(backButton);
-    
+
     this.sheetController.setContent(content);
   }
 }
@@ -1569,6 +1566,22 @@ prototype/mortgage-data-collection.js
 
 # Current Time
 3/31/2025, 5:52:01 PM (America/Denver, UTC-6:00)
+
+# Current Mode
+ACT MODE
+</environment_details>
+<environment_details>
+# VSCode Visible Files
+prototype/styles.css
+
+# VSCode Open Tabs
+prototype/sheet-physics.js
+prototype/mortgage-data-collection.js
+prototype/sheet-controller.js
+prototype/styles.css
+
+# Current Time
+3/31/2025, 6:05:06 PM (America/Denver, UTC-6:00)
 
 # Current Mode
 ACT MODE
