@@ -91,9 +91,14 @@ class SheetController {
     
     // Improved pointer handling
     const onPointerDown = (e) => {
-      // Only handle events in the sheet or handle
-      if (!this.isPartOfSheet(e.target)) return;
-      
+      // Allow drag initiation if:
+      // 1. The target is part of the sheet OR
+      // 2. The sheet is closed/docked (allowing background swipe-up)
+      const canInitiateDrag = this.isPartOfSheet(e.target) ||
+                              ['closed', 'docked'].includes(this.currentPosition);
+
+      if (!canInitiateDrag) return;
+
       // Only capture the first pointer for dragging
       if (isDragging) return;
       
@@ -201,15 +206,33 @@ class SheetController {
     this.sheetElement.addEventListener('pointercancel', onPointerCancel, { passive: false });
     
     // Prevent default touch actions to avoid scrolling conflicts, but allow input focus
-    // Simplified based on feedback
+    // Further refined based on feedback for browser clicks and input focus
     this.sheetElement.addEventListener('touchstart', e => {
       const targetElement = e.target;
-      // If the target is an input or textarea, do nothing (allow default browser behavior like focus)
-      if (targetElement.tagName === 'INPUT' || targetElement.tagName === 'TEXTAREA' || targetElement.tagName === 'SELECT') {
+
+      // Check if the target is an interactive element within the sheet content
+      const isInteractiveContent = targetElement.closest('.silk-sheet-content') && (
+        targetElement.tagName === 'INPUT' ||
+        targetElement.tagName === 'TEXTAREA' ||
+        targetElement.tagName === 'SELECT' ||
+        targetElement.tagName === 'BUTTON' ||
+        targetElement.tagName === 'A' ||
+        targetElement.closest('label') // Allow taps on labels associated with inputs/radios/checkboxes
+      );
+
+      if (isInteractiveContent) {
+        // Don't prevent default for interactive elements inside the content area.
+        // Allows focusing inputs, clicking buttons/labels, etc.
         return;
       }
-      // Otherwise, prevent default to handle sheet dragging
-      e.preventDefault();
+
+      // Prevent default only if the touch starts on the handle or the sheet background itself,
+      // indicating an intent to drag the sheet.
+      if (targetElement === this.handleElement || targetElement === this.sheetElement) {
+         e.preventDefault();
+      }
+      // Otherwise, allow default (might be scrolling within content if not handled below, etc.)
+
     }, { passive: false });
 
     // Handle content scrolling with improved logic

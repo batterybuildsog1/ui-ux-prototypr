@@ -21,9 +21,9 @@ class SheetPhysics {
       closed: 0,
       docked: 0.15,  // 15% of screen height
       half: 0.5,     // 50% of screen height
-      full: 0.85     // 85% of screen height
+      full: 0.92     // Increased from 0.85 to allow sheet to go higher
     };
-    
+
     // Tracking state
     this.position = 0;
     this.targetPosition = 0;

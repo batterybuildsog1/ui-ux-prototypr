@@ -1555,3 +1555,18 @@ class MortgageDataCollection {
     this.sheetController.setContent(content);
   }
 }
+<environment_details>
+# VSCode Visible Files
+prototype/mortgage-data-collection.js
+
+# VSCode Open Tabs
+prototype/sheet-physics.js
+prototype/sheet-controller.js
+prototype/mortgage-data-collection.js
+
+# Current Time
+3/31/2025, 5:52:01 PM (America/Denver, UTC-6:00)
+
+# Current Mode
+ACT MODE
+</environment_details>
